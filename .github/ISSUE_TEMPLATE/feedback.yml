@@ -1,0 +1,43 @@
+﻿name: Feedback
+description: Share a use case, problem, or improvement for After the Oracle.
+title: "[Feedback]: "
+labels: ["feedback"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What were you trying to do with AI?
+      placeholder: I was using an agent to plan a release, review a document, debug a system...
+    validations:
+      required: true
+  - type: textarea
+    id: friction
+    attributes:
+      label: Where the harness helped or failed
+      description: Describe the moment where the Skill was useful, confusing, too heavy, or missing something.
+    validations:
+      required: true
+  - type: dropdown
+    id: tool
+    attributes:
+      label: Tool
+      options:
+        - Codex
+        - Claude Code
+        - GitHub Copilot
+        - Cursor
+        - Cascade / Devin / Windsurf
+        - Gemini CLI
+        - Aider
+        - Other
+    validations:
+      required: false
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed improvement
+      description: If you have a concrete wording or workflow change, put it here.
+    validations:
+      required: false
+

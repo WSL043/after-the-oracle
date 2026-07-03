@@ -1,0 +1,30 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" role="img" aria-labelledby="title desc">
+  <title id="title">After the Oracle Architecture</title>
+  <desc id="desc">Execution feeds verification, verification feeds human judgment, and accepted decisions update the operating record.</desc>
+  <rect width="900" height="520" fill="#FFFFFF"/>
+  <text x="56" y="58" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="30" font-weight="800" fill="#111827">Three-layer operating model</text>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif">
+    <rect x="130" y="110" width="640" height="76" rx="10" fill="#111827"/>
+    <text x="164" y="143" font-size="22" font-weight="700" fill="#FFFFFF">Human judgment layer</text>
+    <text x="164" y="169" font-size="15" fill="#D1D5DB">decision briefs, principles, escalation, accepted tradeoffs</text>
+    <rect x="130" y="240" width="640" height="76" rx="10" fill="#0E7C7B"/>
+    <text x="164" y="273" font-size="22" font-weight="700" fill="#FFFFFF">Verification layer</text>
+    <text x="164" y="299" font-size="15" fill="#D9F4F2">independent checks, adversarial review, source validation</text>
+    <rect x="130" y="370" width="640" height="76" rx="10" fill="#E6A23C"/>
+    <text x="164" y="403" font-size="22" font-weight="700" fill="#111827">Execution layer</text>
+    <text x="164" y="429" font-size="15" fill="#2F2415">drafting, coding, research, routine task completion</text>
+    <path d="M450 370 L450 329" stroke="#111827" stroke-width="4" fill="none" marker-end="url(#arrow)"/>
+    <path d="M450 240 L450 199" stroke="#111827" stroke-width="4" fill="none" marker-end="url(#arrow)"/>
+    <path d="M770 148 C840 198 840 378 770 410" stroke="#C44536" stroke-width="4" fill="none" marker-end="url(#arrowRed)"/>
+    <text x="654" y="494" font-size="14" fill="#4B5563">accepted decisions update the record</text>
+  </g>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#111827"/>
+    </marker>
+    <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#C44536"/>
+    </marker>
+  </defs>
+</svg>
+

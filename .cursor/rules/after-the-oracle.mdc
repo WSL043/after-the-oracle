@@ -1,0 +1,17 @@
+﻿---
+description: Apply After the Oracle when planning, reviewing, publishing, or verifying AI-assisted work that needs a human judgment layer.
+globs:
+  - "**/*"
+alwaysApply: false
+---
+
+Read `skills/after-the-oracle/SKILL.md` before substantial work.
+
+Use its core loop:
+
+1. Separate planning from execution.
+2. Treat generation and verification as separate jobs.
+3. Use adversarial review before public or high-cost output.
+4. Escalate irreversible, legal, financial, medical, security, credential, deletion, or publication decisions to the human.
+5. Record decisions and assumptions instead of relying on chat memory.
+
