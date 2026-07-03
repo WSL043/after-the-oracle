@@ -35,18 +35,20 @@ It is a portable Skill for the day you cannot outsource judgment to a stronger m
 > The oracle may leave.  
 > The compass must stay in your hands.
 
+## At A Glance
+
+| When you feel this | Use After the Oracle to | The agent should produce |
+|---|---|---|
+| "The model can help, but I should not trust it alone." | Separate execution from verification. | A draft, an independent check, and remaining risks. |
+| "This action is public, expensive, or hard to undo." | Force a human judgment point. | A decision brief with options, costs, and rollback notes. |
+| "The answer sounds smooth, but something feels off." | Run non-expert inspection. | Divergence checks, reversal tests, and plain-language explanations. |
+| "The project is getting too long for chat memory." | Externalize state. | A decision record, assumptions, and next actions. |
+
 ## The Shape Of The System
 
-```mermaid
-flowchart TB
-    E["Execution layer<br/>cheap models draft, code, research, summarize"]
-    V["Verification layer<br/>fresh context, adversarial review, source checks"]
-    H["Human judgment layer<br/>decision briefs, principles, escalation"]
-    R["Decision record<br/>the project remembers what the model cannot"]
-    E --> V --> H
-    H --> R
-    R --> E
-```
+<p align="center">
+  <img src="assets/system-map.png" alt="Execute, verify, judge, and record workflow" width="100%">
+</p>
 
 After the Oracle gives you:
 
@@ -112,6 +114,15 @@ This is not a prompt pack. It is not a claim that weaker models become wise. It 
 The model can draft. The model can verify. The model can argue against itself.
 
 The final judgment remains human.
+
+## Copy/Paste Samples
+
+| Situation | Say this to the agent | Good output shape |
+|---|---|---|
+| Planning a release | `Use After the Oracle. Plan first, do not execute yet.` | Plan, assumptions, risks, verification path. |
+| Reviewing an AI answer | `Use After the Oracle to verify this answer adversarially.` | Failure modes, uncertain claims, checks to run. |
+| Deciding whether to publish | `Prepare a judgment brief before publication.` | Options, recommendation, reversibility, final human question. |
+| Continuing a long project | `Update the decision record and continue from it.` | Current state, decisions used, next actions. |
 
 ## License
 
