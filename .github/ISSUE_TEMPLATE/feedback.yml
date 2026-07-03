@@ -28,8 +28,6 @@ body:
         - GitHub Copilot
         - Cursor
         - Cascade / Devin / Windsurf
-        - Gemini CLI
-        - Aider
         - Other
     validations:
       required: false

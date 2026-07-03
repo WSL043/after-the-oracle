@@ -109,3 +109,7 @@ skills/after-the-oracle/SKILL.md
 | 判断是否公开 | `公开前先准备一份决策简报。` | 选项、推荐、可逆性、给人的最终问题。 |
 | 继续长期项目 | `更新决策记录，并基于它继续。` | 当前状态、已用决策、下一步行动。 |
 
+## License
+
+目前还没有选择最终许可证。公开可见不等于授予复用权。详情见 [docs/license-options.md](docs/license-options.md)。
+
