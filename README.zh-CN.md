@@ -111,5 +111,5 @@ skills/after-the-oracle/SKILL.md
 
 ## License
 
-目前还没有选择最终许可证。公开可见不等于授予复用权。详情见 [docs/license-options.md](docs/license-options.md)。
+MIT。你可以按照 [LICENSE](LICENSE) 的条款自由使用、修改、发布和再分发本项目。
 

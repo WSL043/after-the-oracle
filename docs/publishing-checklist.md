@@ -7,6 +7,7 @@
 - Search GitHub for direct name conflicts.
 - Remove any private notes, credentials, logs, or personal context.
 - Review `skills/after-the-oracle/SKILL.md` for anything that should not be public.
+- Confirm the repository includes `LICENSE` with MIT terms.
 - Re-check the official compatibility docs if publishing after 2026-07-03.
 
 ## Suggested GitHub Settings

@@ -99,6 +99,7 @@ skills/after-the-oracle/SKILL.md      Canonical source Skill
 .github/skills/after-the-oracle/      VS Code / Copilot skill copy
 .agents/skills/after-the-oracle/      Cross-agent skill copy
 .windsurf/skills/after-the-oracle/    Cascade / Windsurf skill copy
+scripts/sync-skill-copies.ps1         Refreshes tool-specific Skill copies
 docs/market-research.md              Ecosystem notes and positioning
 docs/naming.md                       Naming rationale in English, Japanese, Chinese
 docs/compatibility.md                Tool adapters and installation guidance
@@ -126,5 +127,5 @@ The final judgment remains human.
 
 ## License
 
-No final license has been selected yet. Public visibility is not the same thing as a reuse license. See [docs/license-options.md](docs/license-options.md).
+MIT. You can use, copy, modify, publish, and redistribute this project freely under the terms in [LICENSE](LICENSE).
 

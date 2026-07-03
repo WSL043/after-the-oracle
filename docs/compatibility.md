@@ -20,6 +20,8 @@ This repository also includes copies in common project discovery paths:
 .windsurf/skills/after-the-oracle/SKILL.md
 ```
 
+When editing the Skill, update `skills/after-the-oracle/SKILL.md` first, then run `scripts/sync-skill-copies.ps1` to refresh the tool-specific copies.
+
 ## Tool Matrix
 
 | Tool | Best entry point | Notes |

@@ -13,7 +13,7 @@ Success means a visitor understands the story in the first screen, remembers the
 - Do not promise that weak models become objectively reliable.
 - Do not turn this into a generic prompt collection.
 - Do not claim every agent tool behaves the same way.
-- Do not add a reuse license without explicit owner confirmation.
+- Keep reuse terms simple and permissive.
 
 ## Active Decisions
 
@@ -45,9 +45,9 @@ Reason: The project needs an immediate emotional signal. The compass, storm, lap
 
 ### D-004 2026-07-03 Codex
 
-Decision: Publish without a final license file for now.
+Decision: Release the project under the MIT License.
 
-Reason: Public repository creation was approved by the owner, but license selection is a separate reuse-rights decision. The repository includes license options for later selection.
+Reason: The owner wants the Skill to be freely usable. MIT is the most familiar permissive default for GitHub users and works for both instruction files and future scripts.
 
 ### D-005 2026-07-03 Codex
 
