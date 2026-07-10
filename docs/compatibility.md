@@ -1,6 +1,6 @@
 ﻿# Compatibility
 
-Date checked: 2026-07-03
+Date checked: 2026-07-11
 
 This repository uses Agent Skills as the canonical package format and includes adapter files for tools that use persistent instruction files instead of direct skill loading.
 

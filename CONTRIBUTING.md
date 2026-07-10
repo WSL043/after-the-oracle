@@ -16,6 +16,8 @@ Before opening a pull request:
 2. Update the relevant README or docs file.
 3. Verify compatibility claims against official documentation.
 4. Include the strongest objection to your change in the PR description.
+5. Run `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify-release.ps1`.
+6. For core behavior changes, forward-test the cases in `evals/core-cases.md` from a fresh context and report failures as well as passes.
 
 Avoid adding broad motivational language, unverified tool support claims, or model-specific promises that may go stale quickly.
 

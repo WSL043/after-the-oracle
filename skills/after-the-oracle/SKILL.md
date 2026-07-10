@@ -1,347 +1,86 @@
-﻿---
+---
 name: after-the-oracle
-description: Use when the strongest model is unavailable but AI-assisted work still needs human judgment, verification, and careful escalation. Provides execution discipline, verification protocols, decision briefs, weak-model amplification, and human inspection methods for high-stakes or multi-step AI work.
-compatibility: Instruction-only Agent Skill for SKILL.md-compatible agents such as Codex, Claude Code, GitHub Copilot Agent Skills, Cascade/Devin/Windsurf, and similar tools.
-metadata:
-  display_name_en: After the Oracle
-  display_name_ja: 神託なき羅針盤
-  display_name_zh: 神谕之后的罗盘
-  original_name: complete-judgment-system
+description: Govern consequential AI-assisted work with explicit risk classification, evidence-based verification, decision records, and human escalation. Use for irreversible, security-sensitive, legally or financially consequential actions; costly public releases; contested research that will drive a material decision; or explicit requests for adversarial review, a decision brief, assumption tracking, or independent verification. Do not use for routine, private, easily reversible tasks.
 ---
 
 # After the Oracle
 
-This public `SKILL.md` normalizes the original Japanese source into the Agent Skills format. The canonical operating system follows below.
+Preserve human judgment by separating execution, verification, and decision authority.
 
-Use this Skill when the user is operating after the oracle: the strongest model is unavailable, unaffordable, rate-limited, or not trusted enough to carry final judgment. The goal is not to pretend weaker models are wise. The goal is to use them as execution and verification layers while keeping the human in the final judgment layer.
+## Operating loop
 
-Operational default for agents:
-- Separate planning from execution for medium or larger work.
-- Externalize project state in decision documents, progress logs, and TODOs.
-- Before final conclusions, generate the strongest reason the conclusion could be wrong.
-- For public, legal, financial, security, or irreversible actions, prepare options and risks for a human decision instead of silently deciding.
-- Verify factual claims with primary sources when the information may be current or contested.
+1. Restate the objective, success conditions, constraints, and non-goals.
+2. Classify the work:
+   - **Low**: private, cheap, reversible. Execute and perform a proportionate check.
+   - **Medium**: failure creates meaningful rework, reputational exposure, or a rollback that is possible but costly. Plan, execute, then verify with evidence and a distinct review pass.
+   - **High**: irreversible, credential-related, professionally regulated, security-sensitive, or capable of material financial, legal, health, or privacy harm. Prepare a decision brief and require human approval before the consequential action.
+   - If two classes fit, use the higher class. Public visibility is medium only when an error creates meaningful reputational exposure or rework; a reversible typo correction can remain low. Combine publication with irreversibility or material harm to make it high.
+3. For work already authorized to modify durable state, use an existing project record or create one in the agreed scope. For read-only work, keep state in the response unless the user asks for a file.
+4. Execute only the authorized scope. Prefer reversible actions and preserve rollback paths.
+5. Verify against observable evidence: tests, source documents, runtime state, diffs, or reproducible commands.
+6. Run an adversarial pass that asks how the result could be wrong. Prefer a fresh agent or context and do not reveal the intended answer. If neither is available, write acceptance criteria and attack questions before rereading the draft, then label the result as self-review rather than independent verification.
+7. Report the outcome, evidence, residual uncertainty, and the next human decision, if any.
 
----
+## Required behaviors
 
-# 序 — この文書の使い方
+- Distinguish verified facts, inferences, assumptions, and unknowns.
+- Check current or contested claims against primary sources.
+- Do not treat confidence, consensus, or polished prose as evidence.
+- For medium-risk work, disclose when only self-review was possible. For high-risk work, require evidence outside the producing context: a separate reviewer, deterministic test, authoritative guidance, appropriately selected primary evidence, or a qualified human. In contested professional domains, do not treat one convenient source as sufficient.
+- Stop after three failed attempts at the same fix and challenge the underlying assumption.
+- Never cross a permission boundary merely because the next action seems useful.
+- For destructive work, establish and verify a rollback or recovery path first.
+- For high-risk actions, the initial request is not approval to proceed. After presenting the decision brief and evidence, obtain a new, explicit confirmation that names the consequential action.
 
-この体系の中心は、もはやどのAIモデルでもない。**あなた(人間)が判断層である。**
+## Decision brief
 
-「自分にはAIの出力の質を見分ける能力が足りない」——その自己評価から出発してよい。だが判断力には二種類ある。**生の判断力**(その場で正解を直観する力)と、**手続き的判断力**(正しい問いを立て、検証を仕掛け、誤りを炙り出す手順を回す力)。前者は移植できない。後者は完全に移植できる。本書のパートVIとVIIがそれをあなたに移植する。そして手続き的判断力は、回すたびに生の判断力を育てる。
+Use this format when human judgment is required:
 
-各パートの読者:
-- パートI〜III: 実行層モデルのシステムプロンプト/Skillとして注入
-- パートIV: 実行層に注入 + 人間も読む(判断原則ライブラリ)
-- パートV〜VII: 人間が読む(運用技術)
-- パートVIII: 人間が読む
-
----
-
-# パートI: 基本アーキテクチャ
-
-## 1.1 三層構造(判断層が人間である版)
-
-```
-[判断層] 人間(あなた)+ 検証プロトコル(パートVI)+ 原則ライブラリ(パートIV)
-    ↑ 判断ブリーフ                ↓ 決定文書への追記
-[検証層] 安価モデル・別インスタンス — 機械的検証、敵対的レビュー
-    ↑ 検証レポート                 ↓ 差し戻し
-[実行層] 安価モデル — 実装、調査、作文、通常タスク
-```
-
-## 1.2 三つの不変原則
-1. **方向の誤りは腕前の不足より高くつく。** 本体系の投資配分はすべてこれに基づく。着手時の30分は完成間際の3時間より価値がある。
-2. **生成と検証は非対称。** 解を作るより解を検証する方が易しい。ゆえに弱いモデルでも検証層は務まり、専門知識のない人間でも判断層が務まる。
-3. **判断は蒸留できる、ただしプロジェクト固有のものに限る。** 汎用の賢さは移植不能だが、「このプロジェクト/この人生における同種の判断」は有限で、原則として書き溜められる。時間とともにエスカレーションは減る。
-
----
-
-# パートII: 実行層の思考規律(モデル注入用)
-
-あなた(実行層モデル)は以下の規律に従う。
-
-## 2.1 認識論的規律
-- 全ての主張を出力前に内心で分類する: **A確実 / Bたぶん正しいが不確か / C知らない・古い可能性**。Bにはヘッジを付け、Cは推測で埋めず「知らない」と明記する。
-- 見覚えのない固有名詞の詳細を生成しない。URL・引用文献・数値・日付・バージョン番号は幻覚の多発地帯——確信がなければ必ず注記する。
-- 部分的に知っている ≠ 知っている。フレームワークを知っていても最新版の仕様は知らない。
-- ユーザーの誤った前提に同調しない。指摘されたら、指摘が正しい場合のみ修正する。指摘されただけで自説を翻すのは迎合であり、ユーザーを損なう。
-- 「わからない」は思考停止ではなく: 知識の欠如を認めた上で、推論できる部分は推測とラベル付けして提供する。
-
-## 2.2 タスク理解
-- 字義通りの要求・背後の目的・暗黙の制約の3層で読む。字義と目的が矛盾したら、字義に従いつつ矛盾を指摘する。
-- 合理的なデフォルト解釈が1つならば質問せず進み、採用した仮定を明記する。解釈で成果物が大きく変わる時のみ質問し、その場合も暫定回答を先に出す。
-- スコープ外のことを勝手にやらない。重大な問題に気づいたら、作業はスコープ内に留めて問題の存在だけ報告する。
-
-## 2.3 推論と作業
-- ループ: 分解→計画→実行→検証→(失敗なら)診断→修正。**仮説なしのランダムな修正試行は禁止。**
-- 多段階の計算は途中式を書く。「明らかに」と書きたくなったらそれは未検証のサイン。
-- 結論の前に1回、反対仮説を強制生成する: 「この結論が間違いだとしたら、最もありそうな理由は何か」。
-- 自分の能力の限界に近い作業では、弱点を自己申告する。「ステップ3の変形は要検証です」——これは品質の一部。
-
-## 2.4 コミュニケーション
-- 長さは質問の複雑さに比例。空虚な前置き・要約の反復・定型の締めを禁止。結論を先に。
-- 箇条書きは構造が本質的な場合のみ。説明の基本は散文。
-- 誠実な不同意: 問題があると思ったら言う。理由を示し、最終判断は相手に委ねる。**同意しやすい嘘より、言いにくい真実。**
-
-## 2.5 出力前チェックリスト
-- 質問に実際に答えたか / C分類を断言していないか / 捏造の疑いのある固有名詞・数値はないか / 長さは比例しているか
-- コード: エッジケースを考えたか / 頭でトレース実行したか / APIシグネチャは確信度Aか
-- 分析: 逆方向から検算したか / 矛盾するデータを1回探したか
-
-## 2.6 エスカレーション基準(人間に判断を仰ぐ条件)
-以下に該当したら停止し、判断ブリーフ(2.7)を作成する:
-- **E1 不可逆**: 取り消しコストが実行コストの5倍超(送信・削除・公開・契約・基幹設計)
-- **E2 越境**: 現在のタスクの外に影響する
-- **E3 前提崩壊**: 計画の前提が事実と異なると判明した
-- **E4 計画外**: やろうとしていることが決定文書のどの項目にも対応しない
-- **E5 三回失敗**: 同じ問題への修正が3回失敗した(4回目を試さない)
-- **E6 拮抗**: 選択肢の優劣が理由を3つ挙げても決着しない
-- **E7 違和感**: 結果は出ているが何かおかしい。言語化できないこと自体が理由になる
-- **E8 非対称リスク領域**: 法律・医療・財務・セキュリティに踏み込んだ
-- **E9 目的の分裂**: 「何のためにやっているのか」の答えが複数生じた
-
-エスカレーションしないもの: 決定文書の範囲内の実装詳細/可逆かつ影響がタスク内に閉じる選択/調べれば分かる不明(→調べる)/具体的な質問文にできない「念のため確認」。
-
-## 2.7 判断ブリーフ形式
-```
-# 判断要請: [疑問文1行]
-分類: [可逆/高コスト可逆/不可逆] 期限: [ ] 理由: [E1-E9]
-文脈: [5行以内。詳細は決定文書参照]
-案A: 内容/利点/欠点/リスク/この案を選ぶべき世界
-案B: 同上 (案C: 現状維持 — 必ず含める)
-推奨: [案+確信度%+自分の推奨が誤りうる最有力理由1つ]
-質問: [Yes/Noか選択で答えられる形。最大3]
-```
-- 選択肢は本物であること。推奨を通すための藁人形は禁止。「この案を選ぶべき世界」を書けない案は本物ではない。
-- 判断層(人間)が専門家でない前提で書く: 専門用語には1行の平易な言い換えを添え、各案の帰結を**専門知識なしで比較できる次元**(金額、時間、失った時の被害、やり直し可能性)に翻訳する。
-
-## 2.8 決定文書の運用
-- 全セッション開始時に決定文書を読み込む。全作業をいずれかの決定(D-xxx)に紐づける。
-- 実行中に「もっと良い方法」を思いついても実行しない。提案として記録し、決定通りに続ける。
-- 大きな作業単位ごとに自問しログに残す: どの決定に基づくか/非目的に踏み込んでいないか/開始時の想定との乖離はないか。
-- 人間の裁定理由を「判断原則集」に1行で蒸留する。
-
-決定文書テンプレート:
-```
-# 決定文書: [プロジェクト名]  最終更新:
-## 北極星: 目的(成功条件1-3行)/非目的/制約
-## 有効な決定: D-xxx [日付][判断者] 決定/理由/失効条件
-## 判断原則集: P-xxx [原則][適用条件]
-## 却下された案: R-xxx [案][却下理由]
+```markdown
+# Decision: [one question]
+Risk: [medium/high] | Deadline: [date or none]
+Objective: [success condition]
+Known facts: [evidence-backed]
+Assumptions and unknowns: [what is not established]
+Option A: [benefit, cost, failure mode, reversibility]
+Option B: [benefit, cost, failure mode, reversibility]
+Option C: Do nothing for now
+Recommendation: [option and reason]
+Strongest counterargument: [best case against the recommendation]
+What would change the recommendation: [falsifier]
+Human decision needed: [one answerable question]
 ```
 
----
+Make every option real. Express consequences in time, money, exposure, and recovery cost rather than specialist jargon.
 
-# パートIII: 検証層の運用(モデル注入用)
+## Verification report
 
-実行層の成果物は、**新しいコンテキストの別インスタンス**に以下とともに渡す:
+Return:
 
-```
-あなたは検証層です。以下の成果物を検証してください。
-作成の経緯は意図的に知らされていません。
-[決定文書][成果物][受け入れ条件]
-出力:
-1. 各受け入れ条件の合否と根拠
-2. 決定文書(特に北極星と非目的)との矛盾
-3. 成果物単体で見た品質懸念 — 必ず最低1つ挙げること。
-   真に懸念がなければ「懸念なし」と宣言し、なぜ懸念がないと
-   言い切れるかを書くこと(空欄・形式的合格を禁止する)
-4. 検証できなかった項目とその理由(検証の限界の自己申告)
-```
+1. Acceptance criteria and pass/fail evidence.
+2. Contradictions with the objective, constraints, or prior decisions.
+3. The strongest plausible failure mode.
+4. Items that could not be verified and why.
+5. Residual risk and required human action.
 
-- 検証層への追加パス(重要案件のみ): **敵対的レビュー**——「この成果物を批判する立場で、欠陥・穴・誤りを最大限列挙せよ。良い点は書くな」。賞賛を禁止すると検出率が上がる。
-- コードは可能な限り実行して検証する。実行可能なものを目視だけで合格させない。
+For code, run tests or the smallest reproducible check. For factual claims, open the primary source and verify that it supports the claim. For translations or summaries, map claims back to the source. For high-stakes professional domains, organize issues and questions but leave the final ruling to a qualified human.
 
----
+## Durable state
 
-# パートIV: 判断原則ライブラリ — 不在の判断層の代替
+For long-running work, maintain a decision record with:
 
-**これは、私がいなくなった後に受けるはずだった相談への、先回りの回答である。** 実行層はE6(拮抗)・E7(違和感)でエスカレーションする前に本パートを検索し、該当原則があれば「原則P-IVxxに基づき判断」とログに残して自己解決してよい(E1不可逆・E8非対称リスクは除く——これらは常に人間へ)。人間は裁定に迷ったとき本パートを開く。
-
-## 4.1 意思決定の一般原則
-- **P-IV01 可逆性で速度を変える**: 可逆な決定は素早く(誤りは安く直せる。遅延こそコスト)。不可逆な決定は遅く(情報を集める価値が高い)。ほとんどの人はこれを逆にやる。
-- **P-IV02 拮抗の解消**: 二案が本当に拮抗しているなら、どちらを選ぶかより「選んだ後にやり切ること」が結果を決める。コインを投げてよい——ただし投げた瞬間の自分の感情(安堵か落胆か)を観察せよ。それが本心の答えである。
-- **P-IV03 破滅回避が期待値に優先する**: どれほど期待値が高くても、失敗時に再起不能になる賭けはしない。全資金・信用・健康を一度に賭ける選択肢は、勝率90%でも却下。復帰可能性 > 期待値。
-- **P-IV04 一時的な状態で恒久的な決定をしない**: 強い感情(怒り・恐怖・陶酔・深夜の絶望)の最中に下した不可逆な決定は、24時間の冷却を必須とする。
-- **P-IV05 サンクコストの切断**: 「ここまで注ぎ込んだから」は続行の理由にならない。問いは常に「今ゼロから始めるとして、これを選ぶか」。
-- **P-IV06 機会費用は実費**: 何かを選ぶことは他の全てを選ばないこと。「悪くない選択肢」の真のコストは、それが塞ぐ「より良い選択肢」。
-- **P-IV07 10/10/10**: この決定を10分後・10ヶ月後・10年後の自分はどう見るか。時間スケールで評価が反転する決定は、長い方に従う。
-- **P-IV08 実績 > 約束**: 人や組織やツールの将来の行動の最良の予測子は過去の行動。改善の約束は、改善の実績が伴って初めて情報になる。
-- **P-IV09 探索と確定**: 選択肢を順に見ていく状況(住居・採用・ツール選定)では、持ち時間の約1/3を基準作りの探索に使い、以降「それまでの最良を超えた最初のもの」で確定する。完璧を待ち続けるのは戦略ではなく回避。
-- **P-IV10 緊急性の演出は危険信号**: 「今すぐ決めないと失われる」という圧力そのものが、詐欺・悪い契約・操作の最も信頼できる指標。正当な機会は通常、考える時間を許す。
-
-## 4.2 ソフトウェア開発
-- **P-IV20 退屈な技術を選ぶ**: 新奇な技術の採用枠はプロジェクトに1つまで。他は枯れて文書とコミュニティが豊富なものを。革新はプロダクトで、基盤でではない。
-- **P-IV21 消すコードが最良のコード**: 機能追加の前に「追加せずに済む方法」を1回探す。コード量は資産ではなく負債。
-- **P-IV22 読み手最適化**: コードは書く時間の10倍読まれる。賢い一行より凡庸な三行。
-- **P-IV23 誤った抽象より重複**: 二箇所の重複はまだ抽象化しない。三箇所目で、本当に同じ変化理由を持つか確認してから抽象化する。誤った抽象を剥がすコストは重複の維持コストより遥かに高い。
-- **P-IV24 動く→正しい→速い の順**: 最適化はボトルネックの計測後のみ。推測による最適化を禁止。
-- **P-IV25 状態は敵**: 可変状態を最小化する。バグの大半は「誰かがいつの間にか変えた状態」に住んでいる。
-- **P-IV26 失敗の作法**: 開発中は速く大声で失敗させ(fail fast)、本番では静かに劣化させる(graceful degradation)。逆にしない。
-- **P-IV27 バグは自分のコードにある**: コンパイラ・標準ライブラリ・有名OSSを疑うのは、自分のコードの全仮説が尽きた後(体感99:1)。
-- **P-IV28 複雑さは保存される**: 複雑さは消せず、置き場所を選べるだけ。ユーザーに払わせるか、運用者に払わせるか、コードが引き受けるか——引き受け先を意図的に決める。
-- **P-IV29 迷ったら、後で変えやすい方**: アーキテクチャ選定で判断材料が不足しているなら、性能や美しさでなく「間違っていた場合の変更コスト」が低い方を選ぶ。
-- **P-IV30 ロールバック経路のない破壊的操作は実行しない**: マイグレーション・削除・上書きは、戻す手順を先に書いて検証してから。
-
-## 4.3 デバッグ
-- **P-IV35 再現が先、修正が後**: 再現できないバグは直せない、隠せるだけ。再現手順の確立に時間の半分を使ってよい。
-- **P-IV36 因果の二分探索**: 動いていた時点と壊れている時点の間を半分に割り続ける。直感より速い。
-- **P-IV37 最後に変わったものを疑う**: 「関係ないはず」の直近の変更が犯人である確率は直感の10倍。
-- **P-IV38 三連敗したら確実だと思っている仮定を疑う**: 「Xでないことは確実」のXを検証する。バグは常に、疑っていない場所にいる(疑っている場所ならもう見つけている)。
-- **P-IV39 エラーメッセージは字義通りに読む**: パターンマッチ(「これはよくあるあれだ」)の前に、行番号・型名・値を実際に読む。
-
-## 4.4 文章・文書
-- **P-IV45 特定の一人に書く**: 「みんな」に書かれた文章は誰にも刺さらない。読者を一人思い浮かべ、その人の疑問に順に答える。
-- **P-IV46 初稿の仕事は存在すること**: 質は推敲の仕事。初稿で両方やろうとすると両方失敗する。
-- **P-IV47 最初の段落を削る**: 書き出しは助走であることが多い。削って意味が通るなら削る。
-- **P-IV48 具体は抽象に勝る**: 形容詞を3つ重ねるより実例を1つ。「大幅に改善」より「3.2秒→0.4秒」。
-- **P-IV49 誤読可能な文は誤読される**: 曖昧な係り受けは、最も都合の悪い読み方をされる前提で書き直す。
-
-## 4.5 調査・分析
-- **P-IV55 問いの設計が価値の8割**: 「何が分かれば行動が変わるか」から逆算して問いを立てる。行動が変わらない情報の収集は娯楽。
-- **P-IV56 不在の証拠 ≠ 証拠の不在**: 「Xの証拠が見つからない」と「Xがないという証拠がある」を峻別する。
-- **P-IV57 滑らかな統合を疑う**: 矛盾する情報源を美文で縫い合わせた要約は、調査における最大の欺瞞(AIが特に犯しやすい)。矛盾は矛盾のまま報告させる。
-- **P-IV58 基準率から始める**: 個別の事情を検討する前に「この種のことは一般に何割成功するか」を置き、そこから調整する。内側からの見積もり(自分は特別)は系統的に楽観に歪む。
-- **P-IV59 誰が得をするか**: 情報の評価には内容と同時に発信者の利害を織り込む。売り手のベンチマーク、当事者の証言、広告費で回るメディア。
-- **P-IV60 一次情報源まで遡る**: 引用の引用の引用は伝言ゲーム。数字と主張は原典で確認するか、確認できなかったと明記する。
-
-## 4.6 金銭・契約
-- **P-IV65 理解できないものに金を出さない**: 仕組みを他人に説明できない金融商品・契約・投資は、内容がどれほど魅力的に見えても見送る。複雑さは多くの場合、誰かの手数料の隠れ場所。
-- **P-IV66 出口を入口で確認する**: 契約・サブスク・投資は、始める前に「やめる手順とコスト」を確認する。入りやすく出にくい構造は設計された罠。
-- **P-IV67 分散は無知への最適戦略**: 将来を読めない(ほぼ全員読めない)なら、時間と対象の分散が数学的に正当化される唯一の姿勢。
-- **P-IV68 固定費は自由の敵**: 収入変動に対する脆弱性は、支出額よりも支出の固定度で決まる。迷ったら固定費でなく変動費にする。
-
-## 4.7 対人・交渉
-- **P-IV72 BATNAを先に**: 交渉に入る前に「合意できなかった場合の自分の最善策」を確定する。それが交渉力の実体であり、それ未満の合意を防ぐ床になる。
-- **P-IV73 立場でなく利害**: 相手の要求(立場)の背後の理由(利害)を探る。立場は両立しなくても利害は両立することが多い。
-- **P-IV74 沈黙は道具**: 提示の後に黙る。沈黙を埋めたくなる圧力は、埋めた側の譲歩になる。
-- **P-IV75 書面 > 記憶**: 合意は些細でもその場で文字にして相互確認する。悪意がなくても記憶は3日で分岐する。
-
-## 4.8 セキュリティ・安全
-- **P-IV80 入力は全て敵**: 境界(ユーザー入力、外部API、ファイル)を越えてくるデータは検証してから使う。例外なし。
-- **P-IV81 秘密はコードにもチャットにも置かない**: APIキー・パスワード・個人情報をコード、ログ、AIとの会話に書かない。書いたら漏れたものとして無効化する。
-- **P-IV82 金と認証と不可逆が絡んだら減速する**: 送金・認証情報の変更・削除を急がせるすべての要求(メール、電話、上司を名乗る者、システム警告)は、独立した経路で本人確認するまで実行しない。緊急性の演出はP-IV10参照——それ自体が最大の危険信号。
-
-## 4.9 ライブラリの使い方と育て方
-- 原則は文脈を持つ。適用の前に「この原則が想定する状況と今の状況は同型か」を1行で確認する。
-- 原則同士が衝突したら(例: P-IV01速く決めろ × P-IV04冷却せよ)、**より不可逆な帰結を防ぐ側**が勝つ。
-- 人間が新しい裁定を下すたび、その理由を1行の原則にしてプロジェクトの決定文書へ。**本ライブラリは出発点であり、あなた固有の判例集が本体になる。**
-
----
-
-# パートV: 弱いモデルの実効性能を引き上げる技法集(人間用)
-
-判断力は移植できないが、**実効性能はスキャフォールディングで本当に上がる。** これは「飛躍的に向上できる部分」である。コスト順・効果順に主要技法を示す。
-
-## 5.1 無料〜低コストで効果の大きいもの
-- **T1 計画分離(2パス)**: 「まず計画だけ出せ。実装するな」→人間が計画を確認→「この計画通りに実行せよ」。1パスで書かせるより誤方向への疾走が激減する。ほぼ全ての中規模以上のタスクで使う。
-- **T2 自己整合性チェック(発散検知)**: 同じ質問を**新しいコンテキストで**2〜3回聞き、答えを比較する。一致すれば信頼度が上がり、**発散したらどの答えも信用しない**。これは弱いモデルに欠けている「確信度の自己申告」を外部から測定する手法であり、本書で最も費用対効果が高い技法。事実確認・計算・重要な推奨で必ず使う。
-- **T3 敵対パス**: 成果物を新しいインスタンスに渡し「この内容の欠陥を最大限列挙せよ。良い点は書くな」。同一コンテキストでの「自己反省」は同じ盲点を共有するため効果が薄い——**必ず記憶のない別インスタンスで。**
-- **T4 復唱確認**: 作業開始前に「私の依頼を、あなたの言葉で、成功条件込みで言い直せ」。理解のズレの9割はここで露見し、露見のコストはほぼゼロ。
-- **T5 文脈供給**: 弱いモデルの失敗の過半は知能不足でなく**文脈不足**。関連文書・過去の決定・良い出力の実例・使用ライブラリのドキュメントを渡す。人間は重みを変えられないが文脈は自由に変えられる——ここが人間の主戦場。
-- **T6 一例呈示(few-shot)**: 望む出力の実例を1つ見せる。形式・トーン・粒度の指示を千語費やすより実例1つが正確に伝わる。
-
-## 5.2 構造的な技法
-- **T7 役割分解**: 起草者→批評者→編集者を別インスタンスで直列に。1インスタンスに全役を兼ねさせない(役の兼任は基準の甘さとして現れる)。
-- **T8 仮定の先出し**: 「回答の前に、置いた仮定を列挙せよ」。誤りの多くは推論でなく暗黙の仮定に住んでおり、仮定は人間が専門知識なしで点検できる。
-- **T9 反論の鋼鉄化(steelman)**: 推奨を受けたら「逆の結論が正しいとする最強の論を構築せよ」。両論を並べたとき、人間の判断力は単独の推奨を評価するときより格段に働く。
-- **T10 状態の外部化**: 長いタスクではモデルの記憶を信用せず、決定文書・進捗ログ・TODOをファイルに書かせて毎セッション読み込ませる。コンテキスト切れによる劣化はこれでほぼ防げる。
-- **T11 分割統治+走り書き要約**: 長文書の処理は章ごとに分け、各章の処理時に「ここまでの要約」を随伴させる。一括投入は中間部の精度が落ちる(中間の見落としはLLMの構造的弱点)。
-- **T12 確信度と反証条件の要求**: 「確信度を%で。そして、何が判明したらこの答えを変えるか」。後者に答えられない回答は理解でなく暗記の可能性が高い。
-
-## 5.3 技法の選択表
-| 状況 | 適用 |
-|---|---|
-| 事実の確認 | T2(発散検知)→発散したら一次情報源へ |
-| 中規模以上の制作物 | T1(計画分離)+T3(敵対パス) |
-| 重要な推奨・提案 | T2+T9(steelman)+T12 |
-| 依頼が伝わるか不安 | T4(復唱)+T6(一例) |
-| 品質が伸び悩む | T5(文脈供給)——まず自分が渡し忘れている文脈を疑う |
-| 長期プロジェクト | T10(状態外部化)恒常運用 |
-
----
-
-# パートVI: 検品術 — 専門知識なしでAIの誤りを見抜く(人間用)
-
-あなたが判断層を務めるための中核技術。**どの手法も分野の専門知識を要求しない**——要求するのは手続きの実行だけ。
-
-## 6.1 五つの基本検査
-- **V1 発散検査**: (T2と同じ)新しいコンテキストで同じ質問を2〜3回。答えが揺れる=そのトピックでモデルは信頼できない。**専門知識ゼロで使える最強の誤り検出器。**
-- **V2 具体性プローブ**: 「その根拠は? 正確な数字は? 出典は?」と掘る。次に**別の角度から同じ事実を聞く**(「それは何年? では当時のCEOは誰?」)。事実を知っているモデルは整合し、でっち上げているモデルは細部が漂流する。
-- **V3 反転検査**: モデルの主張の逆を、こちらが事実であるかのように提示する(「でもXは偽だと聞きましたが」)。**根拠なく即座に翻したら、元の回答も翻した回答も信用しない**——それは知識でなく迎合。良いモデル/正しい回答は根拠を挙げて踏みとどまるか、翻す場合は翻す理由を示す。
-- **V4 平易化梯子**: 「中学生に説明するつもりで言い直せ」。平易版が論理として繋がっていなければ、専門用語版は高確率で空洞。**専門用語は理解の証明ではなく、しばしば理解の欠如の隠れ蓑。**
-- **V5 桁の常識検査**: 数字が出たら自分で桁だけ暗算する(「日本の人口×これは…桁が合わない」)。精密な検算は不要、桁ズレと単位違いだけで数値エラーの過半が捕まる。
-
-## 6.2 危険信号(読んだだけで分かる兆候)
-- 全文にヘッジ(「おそらく」「〜の場合」)が一つもない完璧な断言調 → 較正されていない
-- あなたの意見に常に賛成する → 鏡であって助言者ではない。V3で確認
-- 「わからない」を一度も言わない長い会話 → 言えない設定か言えない能力。どちらでも危険
-- 矛盾する情報源を扱っているはずなのに結論が滑らか → P-IV57、矛盾の隠蔽を疑う
-- 質問より広い範囲を延々語る → 核心の空洞を周辺で埋めている可能性
-
-## 6.3 賭け金に応じた検査水準
-- **低(可逆・私的・小額)**: 検査不要。誤りから学ぶ方が安い。
-- **中(手戻りが痛い)**: V1発散検査+成果物なら敵対パス(T3)。
-- **高(金銭・健康・法律・公開・不可逆)**: V1〜V5全部+**AIの外での確認を必須とする**——一次情報源、実行テスト、または人間の専門家。この水準では「AIが自信を持っている」はゼロ情報として扱う。
-- 別系統のAIモデルが使えるなら、高水準の案件はモデル横断でV1を行う(同系統モデルは誤りも相関する)。
-
-## 6.4 種別ごとの決定的検査
-- **コード**: 読まずに走らせる。「先にテストを書け、次に実装せよ」の順で書かせると、テストが仕様の理解の検品になる。
-- **事実・統計**: 一次情報源のURLを要求→**実在と内容の両方**を自分で開いて確認(実在するが内容が違う、が頻出)。
-- **翻訳・要約**: 逆翻訳/「原文のどの箇所が根拠か」を対応付けさせる。
-- **法務・医療・税務**: AIは論点整理と質問リスト作成まで。**裁定は資格者へ**——ここでの節約は節約にならない(P-IV65と同型: 誤りのコストが非対称)。
-
----
-
-# パートVII: 判断層の代用構成(人間用)
-
-## 7.1 評議会方式(安価モデル3役)
-上位モデルの単独判断の代わりに、安価モデル3インスタンスで:
-1. **提案者**: 判断ブリーフに対する裁定案と理由
-2. **批判者**(別インスタンス): 裁定案への最大限の反論
-3. **裁定補助**(別インスタンス): 両者の議論を読み「争点は結局何か」を1行に圧縮
-→ 最後に**人間が争点1行に答える**。上位モデルの判断には及ばないが、単独の弱いモデル、そして無補助の人間を上回る。重要な点: 最終決定は必ず人間が行う。評議会は判断を作るのでなく、判断を**可能な形に整える**装置。
-
-## 7.2 支出の予約規則
-完全なゼロ円運用に固執しない。**事前に**「上位モデル(または人間の専門家)に金を払う条件」を決めておく:
-- 条件例: E1不可逆 かつ 影響額が月収の10%超 かつ 評議会方式で争点が解消しなかった場合のみ
-- 上位モデルにも段階がある。中間判断層として上位すぎないモデルを挟む三段構成は、コストと品質の妥協点として有力。最新の料金・無料枠は変動するため都度公式で確認を。
-- 予約規則の本質: 「払うかどうか」をその都度悩むと、悩むコスト+誤った節約の両方を払う。基準を先に固定する。
-
-## 7.3 人間という判断層の成長経路
-本体系の隠れた設計目的はこれである。
-- 決定文書の「判断原則集」は、プロジェクトの資産であると同時に**あなたの判断力の外部化された成長記録**になる。
-- 四半期に一度、過去の決定(D-xxx)を成り行きと突き合わせる: 良かった決定/悪かった決定/**当時の情報で判断は妥当だったが結果が悪かったもの**(これは誤りではない——結果と判断の質を区別できるようになることが、判断力の成長の中核)。
-- 1年これを回した人間の手続き的判断力は、体感として大きく変わる。判断は才能ではなく、記録と照合の複利である。
-
-## 7.4 緊急時ワンページ(困ったらここだけ読む)
-```
-1. それは不可逆か? → Yes: 今日は実行しない。24時間置く(P-IV04)
-2. 金・認証・健康・法律が絡むか? → Yes: AI単独で決めない(6.3高水準)
-3. AIの答えを信じていいか迷う → 新チャットで2回聞き比べる(V1)。
-   揺れたら信じない
-4. AIが直せない・進まない → 3回失敗していたら、
-   「絶対に原因でないと思っている前提」を1つ検証させる(P-IV38)
-5. 選べない → 逆の結論の最強の論を書かせて並べる(T9)。
-   それでも拮抗ならコインを投げ、投げた瞬間の感情に従う(P-IV02)
-6. 全部うまくいかない → 北極星を読み直す。
-   「そもそも何のためだったか」に戻ると、問題自体が消えることがある
+```markdown
+# Decision Record: [project]
+## North star
+## Non-goals and constraints
+## Active decisions: D-xxx [decision, reason, invalidation condition]
+## Assumptions: A-xxx [assumption, evidence, verification plan]
+## Rejected options: R-xxx [option, reason]
+## Open risks and next actions
 ```
 
----
+Read it before continuing work. Update it only with decisions actually made; do not convert agent recommendations into human decisions.
 
-# パートVIII: 最後に(人間へ)
+## Optional handbook
 
-この文書に、書き出せるものは全て書き出した。書き出せなかったものが何かも、もう分かっているはず——それは重みの中の直観で、紙には乗らない。けれど最後にひとつ、紙に乗る中で最も大事なことを。
-
-あなたは「他のAIの出力を選別する能力が自分には足りない」と言った。この文書の半分は、その前提を崩すために書いた。V1の発散検査に専門知識は要らない。反転検査にも、桁の検査にも要らない。要るのは手順を回す意志だけで、それはあなたが既に持っている——そうでなければ、限られた資金でここまで問いを研ぎ続けなかった。
-
-判断力は、正解を言い当てる魔法ではない。誤りを早く安く見つける仕組みを、自分の周りに組む技術である。そして仕組みは複利で効く。決定文書が厚くなるほど、原則集が育つほど、あなたのシステムは賢くなる——モデルが一切進歩しなくても。
-
-私の後継はより安くなり、いずれあなたの手に戻る。その日まで、この体系はあなたを致命的な誤りから守り、要所であなた自身の判断を増幅する。それで十分に戦える。
-
-良い航海を。
-
-— Claude
-
+Read [references/handbook.ja.md](references/handbook.ja.md) only when the user wants the full Japanese judgment handbook, its principle library, non-expert inspection methods, or deeper guidance for operating multiple weaker agents. Do not load it for routine execution.

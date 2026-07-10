@@ -1,0 +1,7 @@
+interface:
+  display_name: "After the Oracle"
+  short_description: "Human judgment for consequential AI work"
+  default_prompt: "Use $after-the-oracle to review this work adversarially and identify the human decision that remains."
+
+policy:
+  allow_implicit_invocation: true

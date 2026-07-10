@@ -50,6 +50,8 @@
   <img src="assets/system-map.png" alt="执行、验证、判断、记录的流程" width="100%">
 </p>
 
+图中流程：执行（EXECUTE）→ 验证（VERIFY）→ 人类判断（JUDGE）→ 记录（RECORD）。
+
 它包含：
 
 - `skills/after-the-oracle/SKILL.md` 中的标准 Agent Skill
@@ -62,15 +64,30 @@
 
 ## 快速开始
 
-核心文件：
+克隆仓库：
 
-```text
-skills/after-the-oracle/SKILL.md
+```powershell
+git clone https://github.com/WSL043/after-the-oracle.git
+cd after-the-oracle
 ```
 
-如果你的工具支持 Agent Skills，请使用对应发现路径里的副本，或把 `skills/after-the-oracle/` 复制到该工具的 skills 目录。
+VS Code/Copilot 与 Windsurf 会发现项目内副本。个人安装可运行：
 
-其他工具可以使用本仓库提供的适配文件。
+```powershell
+# Codex
+Copy-Item -Recurse skills\after-the-oracle "$HOME\.codex\skills\after-the-oracle"
+# Claude Code
+Copy-Item -Recurse skills\after-the-oracle "$HOME\.claude\skills\after-the-oracle"
+```
+
+| 客户端 | 显式调用方式 |
+|---|---|
+| Codex | `$after-the-oracle` |
+| Claude Code | `/after-the-oracle` |
+| VS Code / Copilot | `/after-the-oracle` |
+| Windsurf / Cascade | `@after-the-oracle` |
+
+Cursor 与 Devin 使用下表中的仓库适配文件。
 
 | 工具体系 | 本仓库文件 |
 |---|---|
@@ -104,12 +121,12 @@ skills/after-the-oracle/SKILL.md
 
 | 场景 | 对 AI 这样说 | 好输出应该长什么样 |
 |---|---|---|
-| 规划发布 | `使用神谕之后的罗盘。先给计划，不要执行。` | 计划、假设、风险、验证路径。 |
-| 审查 AI 回答 | `用神谕之后的罗盘对这个回答做对抗验证。` | 可能缺陷、不确定主张、需要检查的点。 |
+| 规划发布 | `使用 after-the-oracle Skill。先给计划，不要执行。` | 计划、假设、风险、验证路径。 |
+| 审查 AI 回答 | `使用 after-the-oracle Skill 对这个回答做对抗验证。` | 可能缺陷、不确定主张、需要检查的点。 |
 | 判断是否公开 | `公开前先准备一份决策简报。` | 选项、推荐、可逆性、给人的最终问题。 |
 | 继续长期项目 | `更新决策记录，并基于它继续。` | 当前状态、已用决策、下一步行动。 |
 
 ## License
 
-MIT。你可以按照 [LICENSE](LICENSE) 的条款自由使用、修改、发布和再分发本项目。
+MIT。你可以按照 [LICENSE](LICENSE) 的条款自由使用、修改、发布和再分发本项目。内容与图像来源见 [NOTICE.md](NOTICE.md)。
 

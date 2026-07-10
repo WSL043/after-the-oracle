@@ -1,0 +1,17 @@
+name: Verify release package
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify Skill package and stale terms
+        shell: pwsh
+        run: ./scripts/verify-release.ps1

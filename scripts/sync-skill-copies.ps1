@@ -1,17 +1,20 @@
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$source = Join-Path $repoRoot "skills/after-the-oracle/SKILL.md"
+$source = Join-Path $repoRoot "skills/after-the-oracle"
 $targets = @(
-    ".github/skills/after-the-oracle/SKILL.md",
-    ".agents/skills/after-the-oracle/SKILL.md",
-    ".windsurf/skills/after-the-oracle/SKILL.md"
+    ".github/skills/after-the-oracle",
+    ".agents/skills/after-the-oracle",
+    ".windsurf/skills/after-the-oracle"
 )
 
 foreach ($targetRel in $targets) {
     $target = Join-Path $repoRoot $targetRel
-    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $target) | Out-Null
-    Copy-Item -LiteralPath $source -Destination $target -Force
+    if (Test-Path -LiteralPath $target) {
+        Remove-Item -LiteralPath $target -Recurse -Force
+    }
+    New-Item -ItemType Directory -Force -Path $target | Out-Null
+    Copy-Item -Path (Join-Path $source "*") -Destination $target -Recurse -Force
 }
 
-Write-Host "Synced Agent Skill copies from skills/after-the-oracle/SKILL.md"
+Write-Host "Synced Agent Skill package from skills/after-the-oracle"

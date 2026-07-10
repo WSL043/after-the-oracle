@@ -30,7 +30,7 @@ But you need a way to turn those pieces into judgment.
 
 **After the Oracle** is that way.
 
-It is a portable Skill for the day you cannot outsource judgment to a stronger mind. It turns weaker models into an execution layer and a verification layer, while keeping the human in the only place that matters: the final judgment layer.
+It is a portable Skill for the day you cannot outsource judgment to a stronger mind. It gives agents a procedure for execution and evidence-based verification, while keeping consequential decisions with the human.
 
 > The oracle may leave.  
 > The compass must stay in your hands.
@@ -62,13 +62,39 @@ After the Oracle gives you:
 
 ## Quick Start
 
-Use the canonical Skill:
+Clone the repository:
 
-```text
-skills/after-the-oracle/SKILL.md
+```powershell
+git clone https://github.com/WSL043/after-the-oracle.git
+cd after-the-oracle
 ```
 
-For tools that support Agent Skills, use the copy that matches the tool's discovery path, or copy `skills/after-the-oracle/` into that tool's skills directory.
+Project-level discovery works immediately in VS Code/Copilot and Windsurf through the included copies. For a personal installation, copy the entire package:
+
+```powershell
+# Codex
+Copy-Item -Recurse skills\after-the-oracle "$HOME\.codex\skills\after-the-oracle"
+# Claude Code
+Copy-Item -Recurse skills\after-the-oracle "$HOME\.claude\skills\after-the-oracle"
+```
+
+| Client | Explicit invocation |
+|---|---|
+| Codex | `$after-the-oracle` |
+| Claude Code | `/after-the-oracle` |
+| VS Code / Copilot | `/after-the-oracle` |
+| Windsurf / Cascade | `@after-the-oracle` |
+
+Cursor and Devin use the repository adapters listed below rather than a shared invocation syntax.
+
+Verification prompt:
+
+```text
+Use the after-the-oracle skill. Classify the risk of publishing a draft README,
+then show the verification report you would produce before publication.
+```
+
+A correct response classifies the action, separates facts from assumptions, names observable checks, and identifies whether human approval is still required.
 
 For tools that rely on persistent instruction files, use the adapters:
 
@@ -127,5 +153,5 @@ The final judgment remains human.
 
 ## License
 
-MIT. You can use, copy, modify, publish, and redistribute this project freely under the terms in [LICENSE](LICENSE).
+MIT. You can use, copy, modify, publish, and redistribute this project freely under the terms in [LICENSE](LICENSE). See [NOTICE.md](NOTICE.md) for content and asset provenance.
 
